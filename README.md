@@ -2,11 +2,11 @@
 
 Magicbox is a lightweight server app designed to aggressively cache and serve static sites from S3-compatible object storage engines.
 
-It's designed to sit behind a reverse proxy, such as Caddy, and can support multiple site. Resources are cached for 30 days and will hold up to 1GB in-memory before evicting old entries.
+It's designed to sit behind a reverse proxy, such as Caddy, and can support multiple sites. Resources are cached for 30 days and up to (by default) 1GB of resources will be held in-memory before evicting old entries.
 
 ## Bucket layout
 
-Magicbox will only work within a dedicated bucket. At the root level, one directory corresponds to one "resource".
+Magicbox will only work within a dedicated bucket. At the root level, one directory corresponds to one "resource", eg:
 
 ```
 .
