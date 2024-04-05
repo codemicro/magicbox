@@ -2,12 +2,12 @@ name: Build and publish Docker image
 
 on:
   push:
-    branches:    
+    branches:
       - "build"
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: "ghcr.io/codemicro/magicbox"
+  IMAGE_NAME: "ghcr.io/codemicro/magicbox/magicbox"
 
 concurrency: # Prevent two instances of this running at once
   group: build-docker-container
