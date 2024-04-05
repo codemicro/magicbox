@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"git.tdpain.net/codemicro/magicbox/internal/config"
@@ -52,6 +53,7 @@ func (s *server) rootHandler(rw http.ResponseWriter, req *http.Request) error {
 			if err := cf.FromBytes(cacheResp); err != nil {
 				return fmt.Errorf("unmarshal cached value for %s: %w", key, err)
 			}
+			s.incHits()
 			rw.Header().Set(hitMissHeader, "hit")
 			rw.Header().Set("Content-Type", cf.ContentType)
 			_, _ = rw.Write(cf.Body)
@@ -118,6 +120,7 @@ retryGet:
 		rw.Header().Set("Content-Type", *objResp.ContentType)
 	}
 
+	s.incMisses()
 	rw.Header().Set(hitMissHeader, "miss")
 	_, _ = rw.Write(body)
 	return nil
@@ -145,5 +148,28 @@ func (s *server) cacheInvalidationHandler(rw http.ResponseWriter, req *http.Requ
 	}
 
 	rw.WriteHeader(http.StatusNoContent)
+	return nil
+}
+
+func (s *server) cacheStatsHandler(rw http.ResponseWriter, _ *http.Request) error {
+	var ratio float32
+	if s.hitMissCounter.Misses == 0 && s.hitMissCounter.Hits == 0 {
+		ratio = 1
+	} else {
+		ratio = float32(s.hitMissCounter.Hits) / float32(s.hitMissCounter.Misses+s.hitMissCounter.Hits)
+	}
+
+	jsonData, err := json.Marshal(struct {
+		Hits   uint64  `json:"hits"`
+		Misses uint64  `json:"misses"`
+		Ratio  float32 `json:"ratio"`
+	}{s.hitMissCounter.Hits, s.hitMissCounter.Misses, ratio})
+
+	if err != nil {
+		return fmt.Errorf("marshal stats data: %w", err)
+	}
+
+	rw.Header().Set("Content-Type", "application/json")
+	_, _ = rw.Write(jsonData)
 	return nil
 }

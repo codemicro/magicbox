@@ -59,6 +59,7 @@ func ListenAndServe() error {
 
 	{ // Setup admin pages
 		s.adminMux = http.NewServeMux()
+		s.adminMux.Handle("GET /stats", handlerFuncWithError(s.cacheStatsHandler))
 		s.adminMux.Handle("PUT /invalidate/{selector}", handlerFuncWithError(s.cacheInvalidationHandler))
 	}
 
@@ -113,6 +114,20 @@ type server struct {
 	cache    *cache.Cache[[]byte]
 	s3Client *s3.S3
 	adminMux *http.ServeMux
+
+	// Eventual consistency?? That's what this being unguarded by a mutex is right???
+	hitMissCounter struct {
+		Hits   uint64
+		Misses uint64
+	}
+}
+
+func (s *server) incHits() {
+	s.hitMissCounter.Hits += 1
+}
+
+func (s *server) incMisses() {
+	s.hitMissCounter.Misses += 1
 }
 
 type cachedFile struct {
