@@ -12,6 +12,7 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"strings"
 )
 
 const (
@@ -58,15 +59,29 @@ func (s *server) rootHandler(rw http.ResponseWriter, req *http.Request) error {
 		}
 	}
 
+	var canAttemptToGetIndexHTML bool
+	lookupKey := strings.TrimSuffix(key, "/")
+	{
+		// Only allow if we think we're looking at a directory, ie. not looking at a file/something with a dot in the last bit
+		sp := strings.Split(req.URL.Path, "/")
+		canAttemptToGetIndexHTML = !strings.Contains(sp[len(sp)-1], ".")
+	}
+
+retryGet:
 	objResp, err := s.s3Client.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(config.Get().S3BucketName),
-		Key:    aws.String(key),
+		Key:    aws.String(lookupKey),
 	})
 
 	if err != nil {
 		var s3err awserr.Error
 		if errors.As(err, &s3err) {
 			if s3err.Code() == s3.ErrCodeNoSuchKey {
+				if canAttemptToGetIndexHTML {
+					canAttemptToGetIndexHTML = false
+					lookupKey += "/index.html"
+					goto retryGet
+				}
 				rw.WriteHeader(http.StatusNotFound)
 				return nil
 			}
