@@ -46,7 +46,7 @@ func ListenAndServe() error {
 			Credentials:      credentials.NewStaticCredentials(conf.S3CredentialID, conf.S3CredentialSecret, ""),
 			Endpoint:         aws.String(conf.S3Endpoint),
 			Region:           aws.String(conf.S3Region),
-			S3ForcePathStyle: aws.Bool(true),
+			S3ForcePathStyle: aws.Bool(conf.S3ForcePathStyle),
 		}
 
 		awsSession, err := session.NewSession(awsConfig)

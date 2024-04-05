@@ -16,11 +16,13 @@ type Config struct {
 	AdminHTTPAddress  string
 	AdminToken        string
 
-	S3BucketName       string
-	S3CredentialID     string
-	S3CredentialSecret string
-	S3Endpoint         string
-	S3Region           string
+	S3BucketName          string
+	S3CredentialID        string
+	S3CredentialSecret    string
+	S3Endpoint            string
+	S3Region              string
+	S3ForcePathStyle      bool
+	s3ForcePathStyleValid bool
 }
 
 var (
@@ -73,6 +75,16 @@ func Get() *Config {
 		} else {
 			conf.AdminEnabled = true
 		}
+
+		conf.s3ForcePathStyleValid = true
+		if v := os.Getenv("MAGICBOX_S3_FORCE_PATH_STYLE"); v != "" {
+			parsedValue, err := strconv.ParseBool(v)
+			if err != nil {
+				conf.s3ForcePathStyleValid = false
+			} else {
+				conf.S3ForcePathStyle = parsedValue
+			}
+		}
 	})
 	return conf
 }
@@ -86,6 +98,10 @@ func Validate() error {
 
 	if !conf.adminEnabledValid {
 		return errors.New("MAGICBOX_ADMIN_ENABLED not a valid boolean")
+	}
+
+	if !conf.s3ForcePathStyleValid {
+		return errors.New("MAGICBOX_S3_FORCE_PATH_STYLE not a valid boolean")
 	}
 
 	if conf.S3BucketName == "" {

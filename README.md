@@ -51,6 +51,7 @@ curl -D - -X PUT -H "Authorization: Bearer <admin token>" <Magicbox admin addres
   * `MAGICBOX_S3_CREDENTIAL_SECRET`: **required**
   * `MAGICBOX_S3_ENDPOINT`: **required**
   * `MAGICBOX_S3_REGION`: **required**
+  * `MAGICBOX_S3_FORCE_PATH_STYLE`: boolean, default `false`
 * Admin API config:
   * `MAGICBOX_ADMIN_ENABLED`: boolean, enable or disable the entire admin API, default `true`
   * `MAGICBOX_ADMIN_TOKEN`: when set, requires the `Authorization` header to be set with the value of the variable as a bearer token
