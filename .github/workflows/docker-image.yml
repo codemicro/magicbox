@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: "ghcr.io/codemicro/magicbox/magicbox"
+  IMAGE_NAME: "ghcr.io/codemicro/magicbox"
 
 concurrency: # Prevent two instances of this running at once
   group: build-docker-container
@@ -16,6 +16,8 @@ concurrency: # Prevent two instances of this running at once
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
 
     steps:
     - uses: actions/checkout@v3
